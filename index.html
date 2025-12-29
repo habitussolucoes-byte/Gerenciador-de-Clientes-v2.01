@@ -37,7 +37,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/Gerenciador-de-Clientes-v2.01/service-worker.js')
+          .register('/Gerenciador-de-Clientes-v2.01/sw.js')
           .then(() => console.log('SW registrado com sucesso'))
           .catch(err => console.error('Erro ao registrar SW:', err));
       });
