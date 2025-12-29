@@ -1,8 +1,8 @@
 
 import { addMonths, format, differenceInDays, addDays, isToday, isYesterday } from 'date-fns';
-// Fix: Import parseISO and startOfDay from specific sub-paths to resolve "no exported member" error
-import { parseISO } from 'date-fns/parseISO';
-import { startOfDay } from 'date-fns/startOfDay';
+// Fix: Import from subpaths to resolve missing export issues in some environments
+import parseISO from 'date-fns/parseISO';
+import startOfDay from 'date-fns/startOfDay';
 import { Client } from '../types';
 
 export const calculateExpiration = (startDate: string, months: number): string => {
@@ -49,7 +49,6 @@ export const getDaysSince = (dateStr: string): number => {
 };
 
 export const getStatus = (client: Client) => {
-  // If explicitly set to inactive, that takes priority
   if (client.isActive === false) return 'INACTIVE';
 
   const today = startOfDay(new Date());
@@ -58,7 +57,6 @@ export const getStatus = (client: Client) => {
 
   if (!isExpired) return 'ACTIVE';
   
-  // If expired, check if a message was sent *on or after* the day it expired
   if (client.lastMessageDate) {
     const msgDate = startOfDay(parseISO(client.lastMessageDate));
     if (differenceInDays(msgDate, expiration) >= 0) {

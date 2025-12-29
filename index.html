@@ -20,7 +20,9 @@
   "imports": {
     "react": "https://esm.sh/react@19",
     "react-dom": "https://esm.sh/react-dom@19",
+    "react-dom/client": "https://esm.sh/react-dom@19/client",
     "date-fns": "https://esm.sh/date-fns@4",
+    "date-fns/locale": "https://esm.sh/date-fns@4/locale",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
@@ -29,7 +31,6 @@
 }
 </script>
 <style>
-  /* Impede o scroll de "elástico" no topo e fundo, comum em apps nativos */
   body {
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
@@ -50,7 +51,7 @@
         navigator.serviceWorker.register('./sw.js').then(reg => {
           console.log('SW registrado');
         }).catch(err => {
-          console.log('Erro SW:', err);
+          console.error('Erro SW:', err);
         });
       });
     }
