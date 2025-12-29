@@ -1,0 +1,10 @@
+{
+  "name": "Gerenciador TV Online",
+  "description": "Gerenciador de clientes e finanças pessoal para TV Online",
+  "short_name": "GerenciadorTV",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "requestFramePermissions": []
+}
