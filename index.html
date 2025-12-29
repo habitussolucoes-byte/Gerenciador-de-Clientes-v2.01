@@ -1,48 +1,91 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Gerenciador TV Online</title>
-
-  <!-- Manifest -->
-  <link rel="manifest" href="/Gerenciador-de-Clientes-v2.01/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>TV Manager Pro</title>
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#2563eb" />
-  <meta name="description" content="Gerenciador de clientes e finanças pessoal para TV Online" />
-
-  <!-- Tailwind CDN (não cachear no SW) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Import Maps -->
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@19",
-      "react-dom": "https://esm.sh/react-dom@19",
-      "date-fns": "https://esm.sh/date-fns@4",
-      "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-      "react/": "https://esm.sh/react@^19.2.3/",
-      "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
+  <style>
+    body { 
+      background-color: #f9fafb; 
+      margin: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
     }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    input:focus, select:focus, textarea:focus { ring: 2px; ring-color: #3b82f6; outline: none; }
+    
+    /* Animações simples */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+    
+    /* Esconder scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0",
+    "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
-  </script>
+}
+</script>
 </head>
+<body class="max-w-md mx-auto min-h-screen relative pb-32">
+  
+  <header class="bg-blue-600 text-white p-8 shadow-md rounded-b-[3rem] sticky top-0 z-40">
+    <h1 class="text-2xl font-black tracking-tight">TV Manager Pro</h1>
+    <p class="text-sm opacity-80 font-medium">Controle Pessoal de Clientes</p>
+  </header>
 
-<body>
-  <div id="root"></div>
-<script type="module" src="/Gerenciador-de-Clientes-v2.01/main.js"></script>
+  <main id="app-container" class="px-5 mt-[-2rem] space-y-6">
+    <!-- O conteúdo será injetado aqui pelo index.js -->
+    <div class="flex items-center justify-center py-20 text-blue-600 font-bold">
+      Carregando Sistema...
+    </div>
+  </main>
 
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/Gerenciador-de-Clientes-v2.01/sw.js')
-          .then(() => console.log('SW registrado com sucesso'))
-          .catch(err => console.error('Erro ao registrar SW:', err));
-      });
-    }
-  </script>
+  <!-- Navegação Inferior -->
+  <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-gray-100 p-2 rounded-[2.5rem] shadow-2xl flex items-center gap-1 z-50 transition-all">
+    <button data-tab="clients" class="tab-btn px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-lg shadow-blue-200">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+      </svg>
+      Clientes
+    </button>
+    <button data-tab="finances" class="tab-btn px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 text-gray-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+        <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+      </svg>
+      Finanças
+    </button>
+    <button data-tab="settings" class="tab-btn px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 text-gray-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+      </svg>
+      Ajustes
+    </button>
+  </nav>
+
+  <!-- Modais -->
+  <div id="modal-container" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="modal-content" class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh] animate-fade">
+      <!-- Conteúdo do Modal Injetado Aqui -->
+    </div>
+  </div>
+
+  <script type="module" src="./index.js"></script>
 </body>
 </html>

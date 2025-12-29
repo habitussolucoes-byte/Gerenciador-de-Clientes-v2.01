@@ -2,8 +2,12 @@
 import React, { useState, useMemo } from 'react';
 import { Client } from '../types';
 import { formatDateBR, formatCurrency } from '../utils/dateUtils';
-import { format, parseISO, isSameMonth, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+// Import specific sub-modules to resolve missing export errors from the root 'date-fns' module
+import { format, isSameMonth, endOfWeek, isSameDay } from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
+import { startOfWeek } from 'date-fns/startOfWeek';
+// Fix locale import for ptBR to use a more specific and standard path
+import { ptBR } from 'date-fns/locale/pt-BR';
 
 interface Props {
   clients: Client[];
@@ -96,8 +100,7 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
           </div>
           <div className="bg-white/20 p-2 rounded-xl">
              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-               <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-               <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+               <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
              </svg>
           </div>
         </div>
@@ -212,5 +215,3 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
     </div>
   );
 };
-
-export default GlobalTransactionHistory;

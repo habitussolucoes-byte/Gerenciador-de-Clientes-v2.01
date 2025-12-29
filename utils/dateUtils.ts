@@ -1,5 +1,8 @@
 
-import { addMonths, format, parseISO, differenceInDays, startOfDay, addDays, isToday, isYesterday } from 'date-fns';
+import { addMonths, format, differenceInDays, addDays, isToday, isYesterday } from 'date-fns';
+// Import parseISO and startOfDay from their specific sub-modules to avoid root export issues
+import { parseISO } from 'date-fns/parseISO';
+import { startOfDay } from 'date-fns/startOfDay';
 import { Client } from '../types';
 
 export const calculateExpiration = (startDate: string, months: number): string => {

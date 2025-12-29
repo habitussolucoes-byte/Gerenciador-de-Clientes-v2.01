@@ -2,20 +2,20 @@
   "name": "Gerenciador TV Online",
   "short_name": "GerenciadorTV",
   "description": "Gerenciador de clientes e finanças pessoal para TV Online",
-  "start_url": "/Gerenciador-de-Clientes-v2.01/index.html",
-  "scope": "/Gerenciador-de-Clientes-v2.01/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/Gerenciador-de-Clientes-v2.01/icons/icon-192.png",
+      "src": "https://placehold.co/192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/Gerenciador-de-Clientes-v2.01/icons/icon-512.png",
+      "src": "https://placehold.co/512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
