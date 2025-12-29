@@ -6,34 +6,42 @@
 
   <title>Gerenciador TV Online</title>
 
-  <link rel="manifest" href="./manifest.json">
+  <!-- Manifest -->
+  <link rel="manifest" href="/Gerenciador-de-Clientes-v2.01/manifest.json">
   <meta name="theme-color" content="#2563eb" />
   <meta name="description" content="Gerenciador de clientes e finanças pessoal para TV Online" />
 
+  <!-- Tailwind CDN (não cachear no SW) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Import Maps -->
   <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@19",
-    "react-dom": "https://esm.sh/react-dom@19",
-    "date-fns": "https://esm.sh/date-fns@4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19",
+      "react-dom": "https://esm.sh/react-dom@19",
+      "date-fns": "https://esm.sh/date-fns@4",
+      "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+      "react/": "https://esm.sh/react@^19.2.3/",
+      "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
+    }
   }
-}
-</script>
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
 
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js');
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/Gerenciador-de-Clientes-v2.01/service-worker.js')
+          .then(() => console.log('SW registrado com sucesso'))
+          .catch(err => console.error('Erro ao registrar SW:', err));
+      });
     }
   </script>
 </body>
 </html>
-
