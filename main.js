@@ -1,11 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+const root = document.getElementById("root");
 
-const App = () => (
-  <div style={{ padding: 20 }}>
+root.innerHTML = `
+  <div style="padding:20px;font-family:sans-serif">
     <h1>Gerenciador TV Online</h1>
-    <p>App carregado com sucesso 🎉</p>
+    <p>JS carregado com sucesso ✅</p>
   </div>
-);
+`;
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+console.log("main.js carregado");
+
