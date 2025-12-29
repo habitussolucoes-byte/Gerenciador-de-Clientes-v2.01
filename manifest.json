@@ -2,7 +2,7 @@
   "name": "Gerenciador TV Online",
   "short_name": "GerenciadorTV",
   "description": "Gerenciador de clientes e finanças pessoal para TV Online",
-  "start_url": "./index.html",
+  "start_url": "/Gerenciador-de-Clientes-v2.01/index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
