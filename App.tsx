@@ -2,10 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client, DashboardStats, Renewal, AppSettings } from './types';
 import { getStatus, calculateExpiration, getDaysSince } from './utils/dateUtils';
-import { addDays } from 'date-fns';
-// Fix for missing exports in some date-fns environments
-import startOfDay from 'date-fns/startOfDay';
-import parseISO from 'date-fns/parseISO';
+import { startOfDay, addDays, parseISO } from 'date-fns';
 import Dashboard from './components/Dashboard';
 import ClientForm from './components/ClientForm';
 import ClientList from './components/ClientList';
