@@ -21,21 +21,13 @@
       display: flex;
       flex-direction: column;
     }
-    .header-area { 
-      padding-top: calc(1.5rem + var(--safe-top)); 
-      background-color: #2563eb;
-      border-bottom-left-radius: 3rem;
-      border-bottom-right-radius: 3rem;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      z-index: 50;
-      flex-shrink: 0;
-    }
     .nav-fixed { padding-bottom: calc(1.5rem + var(--safe-bottom)); z-index: 100; }
     .content-scroll { 
       flex: 1; 
       overflow-y: auto; 
       -webkit-overflow-scrolling: touch;
       padding-bottom: 160px;
+      padding-top: calc(1.5rem + var(--safe-top));
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     input, select, textarea { font-size: 16px !important; }
@@ -56,17 +48,7 @@
 </head>
 <body class="max-w-md mx-auto">
   
-  <header class="header-area text-white px-6 pb-16">
-    <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-black tracking-tighter">TV Manager Pro</h1>
-        <p class="text-[10px] opacity-70 font-bold uppercase tracking-widest">Painel de Controle</p>
-      </div>
-      <div class="bg-white/20 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md">Online</div>
-    </div>
-  </header>
-
-  <main id="app-content" class="content-scroll px-5 mt-[-2.5rem] no-scrollbar">
+  <main id="app-content" class="content-scroll px-5 no-scrollbar">
     <div class="flex items-center justify-center py-20 text-blue-600 font-black animate-pulse uppercase text-[10px] tracking-widest">
       Sincronizando Dados...
     </div>

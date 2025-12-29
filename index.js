@@ -33,6 +33,15 @@ const getDaysDiff = (dateStr) => {
   return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
 };
 
+const getStartOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const start = new Date(d.setDate(diff));
+  start.setHours(0,0,0,0);
+  return start;
+};
+
 const getStatus = (c) => {
   if (c.isActive === false) return 'INACTIVE';
   const diff = getDaysDiff(c.expirationDate);
@@ -71,9 +80,7 @@ const app = {
     
     const now = new Date();
     const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(now.getDate() - 30);
-    const thirtyDaysFromNow = new Date(); thirtyDaysFromNow.setDate(now.getDate() + 30);
 
-    // Cálculos de Estatísticas
     const history = state.clients.flatMap(c => c.renewalHistory || []);
     const totalRevenue = history.reduce((acc, h) => acc + (parseFloat(h.value) || 0), 0);
     const last30DaysRevenue = history.reduce((acc, h) => {
@@ -97,8 +104,8 @@ const app = {
     }).sort((a,b) => getDaysDiff(a.expirationDate) - getDaysDiff(b.expirationDate));
 
     container.innerHTML = `
-      <div class="space-y-6 animate-fade-in">
-        <!-- Dashboard Grid Completo -->
+      <div class="space-y-6 animate-fade-in pb-20">
+        <!-- Dashboard Grid -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-white p-5 rounded-[2.2rem] shadow-sm border border-gray-100">
             <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Ativos</p>
@@ -115,8 +122,8 @@ const app = {
           </div>
 
           <div class="bg-white p-5 rounded-[2.2rem] shadow-sm border border-gray-100">
-            <p class="text-gray-400 text-[9px] font-black uppercase tracking-widest">Total de Meses</p>
-            <p class="text-lg font-black text-gray-500 mt-1">${totalMonths} <span class="text-[9px]">meses</span></p>
+            <p class="text-gray-400 text-[9px] font-black uppercase tracking-widest">Total Meses</p>
+            <p class="text-lg font-black text-gray-500 mt-1">${totalMonths}</p>
           </div>
 
           <div class="col-span-2 bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-[2.8rem] shadow-xl text-white">
@@ -127,8 +134,8 @@ const app = {
               <button onclick="app.modalAdd()" class="bg-white text-blue-600 w-12 h-12 rounded-full font-black shadow-xl flex items-center justify-center active:scale-90 transition-transform text-xl">+</button>
             </div>
           </div>
-
-          <div class="col-span-2 flex justify-center gap-4 py-1">
+          
+          <div class="col-span-2 flex justify-center gap-4 py-2 bg-white rounded-[2rem] border border-gray-100 shadow-sm">
               <div class="text-center">
                 <p class="text-gray-400 text-[8px] font-black uppercase tracking-widest">Msg Enviada</p>
                 <p class="text-xs font-black text-blue-600">${msgSentCount}</p>
@@ -143,8 +150,8 @@ const app = {
 
         <!-- Filtros e Busca -->
         <div class="space-y-3">
-          <input type="text" placeholder="Pesquisar login ou nome..." oninput="app.search(this.value)" value="${state.searchTerm}" 
-                 class="w-full bg-white border border-gray-100 rounded-2xl p-4.5 font-bold text-sm shadow-sm outline-none focus:ring-4 focus:ring-blue-100">
+          <input type="text" placeholder="Pesquisar..." oninput="app.search(this.value)" value="${state.searchTerm}" 
+                 class="w-full bg-white border border-gray-100 rounded-2xl p-4.5 font-bold text-sm shadow-sm outline-none focus:ring-4 focus:ring-blue-100 transition-all">
           <div class="flex justify-between items-center px-2">
             <button onclick="app.toggleShowAll()" class="text-[9px] font-black uppercase tracking-widest ${state.showAll ? 'text-blue-600' : 'text-gray-300'}">
               ${state.showAll ? 'Ver Apenas Próximos' : 'Ver Toda a Base'}
@@ -152,8 +159,7 @@ const app = {
           </div>
         </div>
 
-        <!-- Lista de Clientes -->
-        <div class="space-y-4 pb-10">
+        <div class="space-y-4">
           ${filtered.map(c => {
             const status = getStatus(c);
             const diff = getDaysDiff(c.expirationDate);
@@ -173,7 +179,6 @@ const app = {
                   </div>
                   ${badge}
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4 border-y border-gray-50 py-4 my-4">
                   <div>
                     <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Expiração</p>
@@ -187,14 +192,12 @@ const app = {
                     <p class="text-sm font-black text-blue-600">${formatCurrency(c.value)}</p>
                   </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-2.5 mt-4">
-                  <button onclick="app.whatsapp('${c.id}')" class="bg-green-500 text-white text-[10px] font-black uppercase py-4 rounded-2xl shadow-lg active:scale-95">WhatsApp</button>
-                  <button onclick="app.modalRenew('${c.id}')" class="bg-blue-600 text-white text-[10px] font-black uppercase py-4 rounded-2xl shadow-lg active:scale-95">Renovar</button>
+                  <button onclick="app.whatsapp('${c.id}')" class="bg-green-500 text-white text-[10px] font-black uppercase py-4 rounded-2xl shadow-lg active:scale-95 transition-all">WhatsApp</button>
+                  <button onclick="app.modalRenew('${c.id}')" class="bg-blue-600 text-white text-[10px] font-black uppercase py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Renovar</button>
                 </div>
-
                 <div class="flex justify-between mt-5 px-1">
-                   <button onclick="app.modalEdit('${c.id}')" class="text-[8px] font-black text-gray-300 uppercase hover:text-blue-500">Editar Cadastro</button>
+                   <button onclick="app.modalEdit('${c.id}')" class="text-[8px] font-black text-gray-300 uppercase hover:text-blue-500">Editar</button>
                    <button onclick="app.toggleActive('${c.id}')" class="text-[8px] font-black text-gray-300 uppercase hover:text-orange-500">${status === 'INACTIVE' ? 'Reativar' : 'Inativar'}</button>
                 </div>
               </div>`;
@@ -204,18 +207,47 @@ const app = {
     `;
   },
 
-  // --- RESTANTE DO APP (MÓDULOS DE FINANÇAS, SETTINGS E AÇÕES) ---
-  // (Mantive a lógica dos módulos finanças e settings mas garanti a integração com o novo dashboard)
   renderFinances: (container) => {
     const history = state.clients.flatMap(c => (c.renewalHistory || []).map(h => ({ ...h, clientName: c.name })));
     const totalAccumulated = history.reduce((acc, h) => acc + (parseFloat(h.value) || 0), 0);
+    const now = new Date();
     
+    // Agrupamento
+    const groups = {};
+    history.forEach(h => {
+      const date = new Date(h.createdAt);
+      let key, label, sublabel;
+
+      if (state.financeFilter === 'day') {
+        key = h.createdAt.split('T')[0];
+        label = formatBR(key);
+        sublabel = (key === formatISO(now)) ? 'Hoje' : '';
+      } else if (state.financeFilter === 'week') {
+        const start = getStartOfWeek(date);
+        key = formatISO(start);
+        label = `Semana de ${formatBR(key).substring(0,5)}`;
+        const end = new Date(start); end.setDate(end.getDate() + 6);
+        sublabel = `Até ${formatBR(formatISO(end)).substring(0,5)}`;
+      } else {
+        key = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}`;
+        label = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+        sublabel = 'Total Mensal';
+      }
+
+      if (!groups[key]) groups[key] = { label, sublabel, total: 0, transactions: [] };
+      groups[key].total += (parseFloat(h.value) || 0);
+      groups[key].transactions.push(h);
+    });
+
+    const sortedGroups = Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
+
     container.innerHTML = `
-      <div class="space-y-6 animate-fade-in">
+      <div class="space-y-6 animate-fade-in pb-20">
         <div class="bg-green-600 p-8 rounded-[2.8rem] shadow-xl text-white">
-          <p class="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-80">Faturamento Acumulado</p>
+          <p class="text-green-100 text-[10px] font-black uppercase tracking-widest opacity-80">Faturamento Geral</p>
           <p class="text-4xl font-black mt-2 leading-none">${formatCurrency(totalAccumulated)}</p>
         </div>
+        
         <div class="bg-gray-100 p-1.5 rounded-[2.2rem] flex items-center gap-1 shadow-inner">
           ${['day', 'week', 'month'].map(f => `
             <button onclick="app.setFinanceFilter('${f}')" 
@@ -224,8 +256,43 @@ const app = {
             </button>
           `).join('')}
         </div>
-        <div class="space-y-3 pb-20">
-          <p class="text-center py-10 text-[9px] text-gray-400 font-bold uppercase tracking-widest">Histórico detalhado disponível em breve</p>
+
+        <div class="space-y-4">
+          ${sortedGroups.map(([key, group]) => {
+            const isExpanded = state.expandedGroups[key];
+            return `
+              <div class="bg-white rounded-[2.5rem] border ${isExpanded ? 'border-blue-100 shadow-md' : 'border-gray-100'} transition-all overflow-hidden">
+                <button onclick="app.toggleFinanceGroup('${key}')" class="w-full text-left p-6 flex justify-between items-center outline-none">
+                  <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center ${isExpanded ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-400'}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-[11px] font-black text-gray-800 uppercase tracking-tighter">${group.label}</h4>
+                      <p class="text-[8px] font-black text-blue-500 uppercase mt-1 tracking-widest opacity-80">${group.sublabel || group.transactions.length + ' Entradas'}</p>
+                    </div>
+                  </div>
+                  <p class="text-sm font-black text-gray-900">${formatCurrency(group.total)}</p>
+                </button>
+                ${isExpanded ? `
+                  <div class="px-6 pb-6 space-y-2 animate-fade-in border-t border-gray-50 pt-4">
+                    ${group.transactions.sort((a,b) => b.createdAt.localeCompare(a.createdAt)).map(tx => `
+                      <div class="bg-gray-50/50 p-4 rounded-2xl flex justify-between items-center border border-gray-50">
+                        <div>
+                          <p class="font-black text-gray-800 text-[11px] tracking-tight">${tx.clientName}</p>
+                          <p class="text-[8px] text-gray-400 font-bold uppercase mt-0.5">${formatBR(tx.createdAt.split('T')[0])}</p>
+                        </div>
+                        <span class="text-xs font-black text-green-600">${formatCurrency(tx.value)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('') || '<p class="text-center py-20 text-[9px] text-gray-400 font-bold uppercase tracking-widest">Nenhuma movimentação</p>'}
         </div>
       </div>
     `;
@@ -235,10 +302,10 @@ const app = {
     container.innerHTML = `
       <div class="space-y-6 animate-fade-in pb-20">
         <div class="bg-white p-7 rounded-[2.8rem] shadow-sm border border-gray-100">
-          <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Mensagens do Sistema</h3>
+          <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Configurações de Mensagens</h3>
           <div class="space-y-5">
             <div>
-              <label class="text-[9px] font-black text-gray-300 uppercase ml-1">Cobrança Antecipada</label>
+              <label class="text-[9px] font-black text-gray-300 uppercase ml-1">Próximo ao Vencimento</label>
               <textarea onchange="app.saveSetting('tplUpcoming', this.value)" class="w-full bg-gray-50 rounded-2xl p-4 text-xs font-bold border-0 mt-2 min-h-[110px] outline-none">${state.settings.tplUpcoming}</textarea>
             </div>
             <div>
@@ -247,23 +314,34 @@ const app = {
             </div>
           </div>
         </div>
-        <button onclick="app.exportJSON()" class="w-full bg-gray-100 text-gray-400 font-black py-4.5 rounded-[2.2rem] text-[9px] uppercase tracking-widest active:scale-95">Gerar Backup Completo (JSON)</button>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="app.exportCSV()" class="bg-white border border-gray-100 text-gray-600 font-black py-4 rounded-[1.8rem] text-[9px] uppercase tracking-widest shadow-sm active:scale-95">Exportar CSV</button>
+          <button onclick="app.exportJSON()" class="bg-white border border-gray-100 text-gray-600 font-black py-4 rounded-[1.8rem] text-[9px] uppercase tracking-widest shadow-sm active:scale-95">Exportar JSON</button>
+        </div>
       </div>
     `;
   },
 
-  // --- AÇÕES DO FORMULÁRIO COMPLETO ---
+  setFinanceFilter: (f) => { state.financeFilter = f; state.expandedGroups = {}; app.render(); },
+  toggleFinanceGroup: (k) => { state.expandedGroups[k] = !state.expandedGroups[k]; app.render(); },
+  search: (v) => { state.searchTerm = v; app.render(); },
+  toggleShowAll: () => { state.showAll = !state.showAll; app.render(); },
+  saveSetting: (key, val) => { state.settings[key] = val; save(); },
+  toggleActive: (id) => {
+    const c = state.clients.find(x => x.id === id);
+    c.isActive = !c.isActive;
+    save(); app.render();
+  },
+
   modalAdd: () => {
     app.showModal(`
       <h2 class="text-2xl font-black text-gray-800 mb-2 tracking-tighter">Novo Cliente</h2>
-      <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-8">Preencha os dados de acesso e pagamento</p>
-      
+      <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-8">Cadastro Completo</p>
       <form onsubmit="app.addClient(event)" class="space-y-4">
         <div>
           <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Nome Completo</label>
           <input type="text" name="name" placeholder="João Silva" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm mt-1 outline-none focus:ring-2 focus:ring-blue-100" required>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Login</label>
@@ -271,10 +349,9 @@ const app = {
           </div>
           <div>
             <label class="text-[10px] font-black text-gray-400 uppercase ml-1">WhatsApp</label>
-            <input type="tel" name="whatsapp" placeholder="Ex: 11999999999" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm mt-1 outline-none" required>
+            <input type="tel" name="whatsapp" placeholder="DDD + Número" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm mt-1 outline-none" required>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Valor R$</label>
@@ -291,7 +368,6 @@ const app = {
             </select>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-[10px] font-black text-orange-400 uppercase ml-1">Data Pagto</label>
@@ -302,8 +378,7 @@ const app = {
             <input type="date" name="startDate" value="${formatISO(new Date())}" class="w-full bg-blue-50/50 p-4 rounded-2xl font-bold text-[11px] mt-1">
           </div>
         </div>
-
-        <button type="submit" class="w-full bg-blue-600 text-white font-black py-5 rounded-[2.2rem] text-xs uppercase shadow-xl mt-6 active:scale-95 transition-all">Salvar e Ativar</button>
+        <button type="submit" class="w-full bg-blue-600 text-white font-black py-5 rounded-[2.2rem] text-xs uppercase shadow-xl mt-6 active:scale-95 transition-all">Cadastrar e Ativar</button>
       </form>
     `);
   },
@@ -338,24 +413,17 @@ const app = {
   modalRenew: (id) => {
     const c = state.clients.find(x => x.id === id);
     app.showModal(`
-      <h2 class="text-2xl font-black text-gray-800 mb-2">Renovar Plano</h2>
+      <h2 class="text-2xl font-black text-gray-800 mb-2">Renovar</h2>
       <p class="text-[10px] font-black text-gray-400 uppercase mb-8 tracking-widest">${c.name}</p>
-      
       <form onsubmit="app.renewClient(event, '${id}')" class="space-y-4">
-        <div>
-          <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Tempo Adicional</label>
-          <select name="months" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm mt-1">
-            <option value="1">1 Mês</option>
-            <option value="3">3 Meses</option>
-            <option value="6">6 Meses</option>
-            <option value="12">1 Ano</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[10px] font-black text-gray-400 uppercase ml-1">Valor Recebido R$</label>
-          <input type="number" step="0.01" name="value" value="${c.value}" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm text-green-600 mt-1" required>
-        </div>
-        <button type="submit" class="w-full bg-green-600 text-white font-black py-5 rounded-[2.2rem] text-xs uppercase shadow-xl mt-4 active:scale-95 transition-all">Confirmar Pagamento</button>
+        <select name="months" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm mt-1">
+          <option value="1">1 Mês</option>
+          <option value="3">3 Meses</option>
+          <option value="6">6 Meses</option>
+          <option value="12">1 Ano</option>
+        </select>
+        <input type="number" step="0.01" name="value" value="${c.value}" class="w-full bg-gray-50 p-4 rounded-2xl font-bold text-sm text-green-600 mt-1" required>
+        <button type="submit" class="w-full bg-green-600 text-white font-black py-5 rounded-[2.2rem] text-xs uppercase shadow-xl mt-4 active:scale-95 transition-all">Confirmar</button>
       </form>
     `);
   },
@@ -385,15 +453,17 @@ const app = {
     app.render();
   },
 
-  // --- AUXILIARES GERAIS ---
-  search: (v) => { state.searchTerm = v; app.render(); },
-  toggleShowAll: () => { state.showAll = !state.showAll; app.render(); },
-  saveSetting: (key, val) => { state.settings[key] = val; save(); },
-  toggleActive: (id) => {
-    const c = state.clients.find(x => x.id === id);
-    c.isActive = !c.isActive;
-    save(); app.render();
+  exportCSV: () => {
+    const headers = ['Nome', 'Usuario', 'WhatsApp', 'Valor', 'Vencimento', 'Ativo'];
+    const rows = state.clients.map(c => [c.name, c.user || '', c.whatsapp, c.value, c.expirationDate, c.isActive ? 'Sim' : 'Não']);
+    const csvContent = "\uFEFF" + headers.join(',') + "\n" + rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `backup_tv_manager.csv`;
+    link.click();
   },
+
   exportJSON: () => {
     const data = JSON.stringify({ clients: state.clients, settings: state.settings });
     const blob = new Blob([data], { type: 'application/json' });
@@ -402,15 +472,18 @@ const app = {
     link.download = `tv_manager_backup.json`;
     link.click();
   },
+
   showModal: (html) => {
-    document.getElementById('modal-container').innerHTML = html + `<button onclick="app.closeModal()" class="w-full mt-8 text-[9px] font-black text-gray-300 uppercase tracking-widest">Fechar</button>`;
+    document.getElementById('modal-container').innerHTML = html + `<button onclick="app.closeModal()" class="w-full mt-8 text-[9px] font-black text-gray-400 uppercase tracking-widest">Fechar</button>`;
     document.getElementById('modal-overlay').classList.remove('hidden');
     document.body.classList.add('modal-open');
   },
+  
   closeModal: () => {
     document.getElementById('modal-overlay').classList.add('hidden');
     document.body.classList.remove('modal-open');
   },
+
   modalEdit: (id) => {
     const c = state.clients.find(x => x.id === id);
     app.showModal(`
@@ -429,6 +502,7 @@ const app = {
       </form>
     `);
   },
+
   updateClient: (e, id) => {
     e.preventDefault();
     const f = new FormData(e.target);
@@ -439,12 +513,14 @@ const app = {
     c.value = parseFloat(f.get('value'));
     save(); app.closeModal(); app.render();
   },
+
   deleteClient: (id) => {
     if (confirm('Excluir permanentemente?')) {
       state.clients = state.clients.filter(x => x.id !== id);
       save(); app.closeModal(); app.render();
     }
   },
+
   init: () => {
     app.render();
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
