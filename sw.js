@@ -1,5 +1,5 @@
 const CACHE_NAME = 'gerenciador-tv-v2';
-const BASE_PATH = '/Gerenciador-de-Clientes-v2.01';
+const BASE_PATH = '/Gerenciador-de-Clientes-v2.01/';
 
 const ASSETS = [
   `${BASE_PATH}/`,
