@@ -1,14 +1,12 @@
 
-const CACHE_NAME = 'tv-manager-v3';
+const CACHE_NAME = 'tv-manager-v4';
 const OFFLINE_URL = 'index.html';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://esm.sh/react@19',
-  'https://esm.sh/react-dom@19'
+  'https://cdn.tailwindcss.com'
 ];
 
 self.addEventListener('install', (event) => {
@@ -47,15 +45,7 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((networkResponse) => {
-        if (event.request.url.startsWith('http')) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      });
+      return response || fetch(event.request);
     })
   );
 });

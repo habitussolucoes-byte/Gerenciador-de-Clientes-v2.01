@@ -2,8 +2,11 @@
 import React, { useState, useMemo } from 'react';
 import { Client } from '../types';
 import { formatDateBR, formatCurrency } from '../utils/dateUtils';
-import { format, isSameMonth, endOfWeek, isSameDay } from 'date-fns';
-// Fix: Import from subpaths to resolve missing export issues in some environments
+// Fix: Use subpath imports for date-fns functions and locales to resolve missing export issues
+import format from 'date-fns/format';
+import isSameMonth from 'date-fns/isSameMonth';
+import endOfWeek from 'date-fns/endOfWeek';
+import isSameDay from 'date-fns/isSameDay';
 import parseISO from 'date-fns/parseISO';
 import startOfWeek from 'date-fns/startOfWeek';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -69,10 +72,6 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
     return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
   }, [allTransactions, activeFilter]);
 
-  const maxGroupValue = useMemo(() => {
-    return Math.max(...groupedTransactions.map(([_, g]) => g.total), 1);
-  }, [groupedTransactions]);
-
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -82,7 +81,7 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
   if (allTransactions.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-300 px-6">
-        <p className="text-gray-400 font-medium font-black uppercase tracking-widest text-[10px]">Sem movimentação</p>
+        <p className="text-gray-400 font-black uppercase tracking-widest text-[10px]">Sem movimentação</p>
       </div>
     );
   }
@@ -128,7 +127,7 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
             {expandedGroups[key] && (
               <div className="px-5 pb-5 space-y-2">
                 <div className="h-px bg-gray-100 w-full mb-4"></div>
-                {group.transactions.map((tx) => (
+                {group.transactions.map((tx: any) => (
                   <div key={tx.id} className="bg-gray-50/50 rounded-2xl p-4 flex items-center justify-between border border-gray-100/50">
                     <div className="flex flex-col min-w-0">
                       <h4 className="font-bold text-gray-800 text-xs truncate uppercase">{tx.clientName}</h4>

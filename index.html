@@ -11,18 +11,17 @@
   <meta name="theme-color" content="#2563eb" />
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Gerenciador de clientes e finanças pessoal para TV Online" />
-
+  
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19",
-    "react-dom": "https://esm.sh/react-dom@19",
-    "react-dom/client": "https://esm.sh/react-dom@19/client",
-    "date-fns": "https://esm.sh/date-fns@4",
-    "date-fns/locale": "https://esm.sh/date-fns@4/locale",
+    "react": "https://esm.sh/react@19?bundle",
+    "react-dom": "https://esm.sh/react-dom@19?bundle",
+    "react-dom/client": "https://esm.sh/react-dom@19/client?bundle",
+    "date-fns": "https://esm.sh/date-fns@4?bundle",
+    "date-fns/locale": "https://esm.sh/date-fns@4/locale?bundle",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
@@ -30,29 +29,51 @@
   }
 }
 </script>
-<style>
-  body {
-    overscroll-behavior-y: none;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-  input, textarea {
-    user-select: auto;
-  }
-</style>
+
+  <style>
+    body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background-color: #f9fafb;
+    }
+    input, textarea { user-select: auto; }
+    #root:empty::before {
+      content: 'Carregando Aplicativo...';
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+      font-weight: bold;
+      color: #2563eb;
+    }
+  </style>
 </head>
 
-<body class="bg-gray-50">
+<body>
   <div id="root"></div>
+
+  <!-- Script de diagnóstico para ajudar o usuário -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('Erro detectado:', e.message);
+      if (e.message.includes('import')) {
+        document.body.innerHTML = `<div style="padding: 20px; font-family: sans-serif; text-align: center;">
+          <h2 style="color: #ef4444;">Erro de Carregamento</h2>
+          <p>O navegador não conseguiu carregar os módulos. Certifique-se de que está usando uma conexão ativa com a internet.</p>
+          <button onclick="location.reload()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 8px;">Tentar Novamente</button>
+        </div>`;
+      }
+    });
+  </script>
+
+  <script type="module" src="./index.tsx"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('SW registrado');
-        }).catch(err => {
-          console.error('Erro SW:', err);
-        });
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
       });
     }
   </script>

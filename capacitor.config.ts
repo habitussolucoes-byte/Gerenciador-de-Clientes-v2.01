@@ -4,7 +4,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.tvmanager.pro',
   appName: 'TV Manager Pro',
-  webDir: '.',
+  webDir: '.', // Define que os arquivos estão na raiz do projeto
   bundledWebRuntime: false,
   server: {
     androidScheme: 'https'
@@ -12,7 +12,9 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
     captureInput: true,
-    backgroundColor: '#2563eb'
+    backgroundColor: '#2563eb',
+    // Permite que o app use o teclado de forma otimizada no Android
+    resizeMode: 'none'
   }
 };
 
