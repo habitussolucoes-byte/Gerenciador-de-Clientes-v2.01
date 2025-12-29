@@ -3,19 +3,19 @@
   "short_name": "GerenciadorTV",
   "description": "Gerenciador de clientes e finanças pessoal para TV Online",
   "start_url": "/Gerenciador-de-Clientes-v2.01/index.html",
-  "scope": "./",
+  "scope": "/Gerenciador-de-Clientes-v2.01/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "https://placehold.co/192x192.png",
+      "src": "/Gerenciador-de-Clientes-v2.01/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://placehold.co/512x512.png",
+      "src": "/Gerenciador-de-Clientes-v2.01/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
