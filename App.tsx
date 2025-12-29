@@ -2,10 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client, DashboardStats, Renewal, AppSettings } from './types';
 import { getStatus, calculateExpiration, getDaysSince } from './utils/dateUtils';
-import { addDays } from 'date-fns';
-// Fix: Import from subpaths to resolve missing export issues
-import startOfDay from 'date-fns/startOfDay';
-import parseISO from 'date-fns/parseISO';
+import { startOfDay, addDays, parseISO } from 'date-fns';
 import Dashboard from './components/Dashboard';
 import ClientForm from './components/ClientForm';
 import ClientList from './components/ClientList';
@@ -52,6 +49,7 @@ const App: React.FC = () => {
   };
 
   const handleAddClient = (clientData: Client & { registrationDate?: string }) => {
+    // Se não houver data de registro informada, usa o momento atual
     const createdAtDate = clientData.registrationDate 
       ? new Date(clientData.registrationDate + 'T12:00:00Z').toISOString() 
       : new Date().toISOString();
@@ -69,6 +67,7 @@ const App: React.FC = () => {
       }]
     };
     
+    // Removemos a propriedade temporária antes de salvar
     delete (newClientWithHistory as any).registrationDate;
 
     const updated = [...clients, newClientWithHistory];
@@ -299,13 +298,32 @@ const App: React.FC = () => {
       </main>
 
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl border border-gray-100 p-2 rounded-[2.5rem] shadow-2xl flex items-center gap-1 z-50">
-        <button onClick={() => setActiveTab('clients')} className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'clients' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('clients')}
+          className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'clients' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+          </svg>
           Clientes
         </button>
-        <button onClick={() => setActiveTab('transactions')} className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'transactions' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('transactions')}
+          className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'transactions' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+            <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+          </svg>
           Finanças
         </button>
-        <button onClick={() => setActiveTab('settings')} className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`px-4 py-3 rounded-[2rem] font-black text-[10px] uppercase tracking-tighter transition-all flex items-center gap-1.5 ${activeTab === 'settings' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400'}`}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+          </svg>
           Ajustes
         </button>
       </nav>
@@ -313,18 +331,27 @@ const App: React.FC = () => {
       {(isAdding || editingClient) && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white w-full max-sm rounded-[2.5rem] p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-black mb-8 text-gray-800">{editingClient ? 'Editar Cadastro' : 'Novo Cadastro'}</h2>
+            <h2 className="text-2xl font-black mb-8 text-gray-800">
+              {editingClient ? 'Editar Cadastro' : 'Novo Cadastro'}
+            </h2>
             <ClientForm 
               initialData={editingClient || undefined}
               onSubmit={editingClient ? handleUpdateClient : handleAddClient} 
-              onCancel={() => { setIsAdding(false); setEditingClient(null); }}
+              onCancel={() => {
+                setIsAdding(false);
+                setEditingClient(null);
+              }}
             />
           </div>
         </div>
       )}
 
       {renewingClient && (
-        <RenewalModal client={renewingClient} onCancel={() => setRenewingClient(null)} onConfirm={handleRenewClientAction} />
+        <RenewalModal
+          client={renewingClient}
+          onCancel={() => setRenewingClient(null)}
+          onConfirm={handleRenewClientAction}
+        />
       )}
     </div>
   );
