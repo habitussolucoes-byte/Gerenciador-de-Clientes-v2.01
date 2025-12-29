@@ -1,5 +1,8 @@
 
-import { addMonths, format, parseISO, differenceInDays, startOfDay, addDays, isToday, isYesterday } from 'date-fns';
+import { addMonths, format, differenceInDays, addDays, isToday, isYesterday } from 'date-fns';
+// Fix: Import parseISO and startOfDay from specific sub-paths to resolve "no exported member" error
+import { parseISO } from 'date-fns/parseISO';
+import { startOfDay } from 'date-fns/startOfDay';
 import { Client } from '../types';
 
 export const calculateExpiration = (startDate: string, months: number): string => {

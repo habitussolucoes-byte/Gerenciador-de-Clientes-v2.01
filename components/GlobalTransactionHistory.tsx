@@ -2,8 +2,15 @@
 import React, { useState, useMemo } from 'react';
 import { Client } from '../types';
 import { formatDateBR, formatCurrency } from '../utils/dateUtils';
-import { format, parseISO, isSameMonth, startOfWeek, endOfWeek, isSameDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+// Fix: Import specific functions from sub-paths to avoid barrel file resolution errors
+import { format } from 'date-fns/format';
+import { parseISO } from 'date-fns/parseISO';
+import { isSameMonth } from 'date-fns/isSameMonth';
+import { startOfWeek } from 'date-fns/startOfWeek';
+import { endOfWeek } from 'date-fns/endOfWeek';
+import { isSameDay } from 'date-fns/isSameDay';
+// Fix: Use correct direct sub-path for pt-BR locale
+import { ptBR } from 'date-fns/locale/pt-BR';
 
 interface Props {
   clients: Client[];
@@ -14,8 +21,8 @@ type FilterType = 'day' | 'week' | 'month';
 const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>('day');
   const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({});
+  const [isPrivacyMode, setIsPrivacyMode] = useState(false);
 
-  // Achatar todas as renovações e adicionar o nome do cliente
   const allTransactions = useMemo(() => {
     return clients.flatMap(client => 
       (client.renewalHistory || []).map(renewal => ({
@@ -25,10 +32,13 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
     ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [clients]);
 
-  // Lógica de agrupamento baseada no filtro
+  const now = new Date();
+  const currentMonthTotal = allTransactions
+    .filter(tx => isSameMonth(parseISO(tx.createdAt), now))
+    .reduce((acc, tx) => acc + tx.value, 0);
+
   const groupedTransactions = useMemo(() => {
     const groups: { [key: string]: { label: string, sublabel: string, total: number, count: number, transactions: any[] } } = {};
-    const now = new Date();
 
     allTransactions.forEach(tx => {
       const date = parseISO(tx.createdAt);
@@ -60,10 +70,13 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
       groups[key].transactions.push(tx);
     });
 
-    const sorted = Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
-    
-    return sorted;
+    return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
   }, [allTransactions, activeFilter]);
+
+  // Encontra o maior valor do grupo para a escala visual
+  const maxGroupValue = useMemo(() => {
+    return Math.max(...groupedTransactions.map(([_, g]) => g.total), 1);
+  }, [groupedTransactions]);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => ({
@@ -72,52 +85,60 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
     }));
   };
 
+  const formatValue = (val: number) => isPrivacyMode ? 'R$ ••••••' : formatCurrency(val);
+
   if (allTransactions.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-300 px-6">
-        <p className="text-gray-400 font-medium">Nenhuma transação registrada ainda.</p>
+        <p className="text-gray-400 font-medium font-black uppercase tracking-widest text-[10px]">Sem movimentação</p>
       </div>
     );
   }
 
-  const now = new Date();
-  const currentMonthTotal = allTransactions
-    .filter(tx => isSameMonth(parseISO(tx.createdAt), now))
-    .reduce((acc, tx) => acc + tx.value, 0);
-
   return (
     <div className="space-y-6">
-      {/* Resumo de Destaque */}
-      <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-[2.5rem] shadow-xl text-white">
-        <div className="flex justify-between items-center mb-4">
+      {/* Resumo Card com Modo Privacidade */}
+      <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-[2.5rem] shadow-xl text-white relative overflow-hidden">
+        <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="flex justify-between items-center mb-4 relative z-10">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Faturamento Mensal</p>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Saldo Mensal</p>
             <h3 className="text-sm font-black uppercase">{format(now, 'MMMM yyyy', { locale: ptBR })}</h3>
           </div>
-          <div className="bg-white/20 p-2 rounded-xl">
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-               <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-               <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
-             </svg>
-          </div>
+          <button 
+            onClick={() => setIsPrivacyMode(!isPrivacyMode)}
+            className="bg-white/20 p-2.5 rounded-2xl hover:bg-white/30 transition-colors"
+          >
+            {isPrivacyMode ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+              </svg>
+            )}
+          </button>
         </div>
-        <p className="text-4xl font-black">{formatCurrency(currentMonthTotal)}</p>
-        <p className="text-[9px] text-green-100 mt-2 font-bold uppercase tracking-widest italic opacity-80">Recebimentos totais no período mensal corrente</p>
+        <p className="text-4xl font-black relative z-10 transition-all">
+          {formatValue(currentMonthTotal)}
+        </p>
       </div>
 
-      {/* Seletor de Filtro */}
-      <div className="bg-gray-100 p-1.5 rounded-[2rem] flex items-center gap-1">
+      {/* Seletor de Filtro - Estilo Android Moderno */}
+      <div className="bg-gray-100 p-1.5 rounded-[2rem] flex items-center gap-1 shadow-inner border border-gray-200">
         {(['day', 'week', 'month'] as FilterType[]).map((filter) => (
           <button
             key={filter}
             onClick={() => {
               setActiveFilter(filter);
-              setExpandedGroups({}); // Fecha tudo ao trocar o filtro também
+              setExpandedGroups({}); // Garante que comece oculto ao trocar filtro
             }}
-            className={`flex-1 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${
+            className={`flex-1 py-3.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
               activeFilter === filter 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-gray-400'
+                ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             {filter === 'day' ? 'Dia' : filter === 'week' ? 'Semana' : 'Mês'}
@@ -126,52 +147,54 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
       </div>
 
       {/* Lista de Grupos */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {groupedTransactions.map(([key, group]) => {
           const isExpanded = expandedGroups[key];
+          const percentage = (group.total / maxGroupValue) * 100;
           
           return (
-            <div key={key} className={`bg-white rounded-[2rem] border transition-all duration-300 ${isExpanded ? 'border-blue-100 shadow-md' : 'border-gray-100'}`}>
-              {/* Cabeçalho do Grupo (Clicável) */}
+            <div key={key} className={`bg-white rounded-[2rem] border transition-all duration-300 overflow-hidden ${isExpanded ? 'border-blue-200 shadow-xl ring-1 ring-blue-50' : 'border-gray-100 shadow-sm'}`}>
+              {/* Barra de Progresso Visual de fundo */}
+              <div className="h-1 w-full bg-gray-50 overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-700 ease-out"
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
+
+              {/* Cabeçalho */}
               <button 
                 onClick={() => toggleGroup(key)}
-                className="w-full text-left p-5 flex justify-between items-center outline-none"
+                className="w-full text-left p-5 flex justify-between items-center outline-none active:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className={`p-2 rounded-xl transition-colors ${isExpanded ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                    {isExpanded ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                        <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                      </svg>
-                    )}
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isExpanded ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 rotate-90' : 'bg-gray-50 text-gray-400'}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
                   </div>
                   <div>
                     <h3 className="text-[13px] font-black text-gray-800 uppercase tracking-tighter leading-none">
                       {group.label}
                     </h3>
-                    <p className="text-[9px] text-blue-500 font-black uppercase mt-1 tracking-widest">
-                      {group.sublabel || `${group.count} ${group.count === 1 ? 'cliente' : 'clientes'}`}
+                    <p className="text-[9px] text-gray-400 font-black uppercase mt-1.5 tracking-widest flex items-center gap-1">
+                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                      {group.count} {group.count === 1 ? 'entrada' : 'entradas'}
+                      {group.sublabel && <span className="text-blue-500 ml-1 opacity-70">| {group.sublabel}</span>}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">Total</p>
-                  <p className="text-lg font-black text-gray-900 leading-none">{formatCurrency(group.total)}</p>
+                  <p className="text-lg font-black text-gray-900 leading-none">{formatValue(group.total)}</p>
                 </div>
               </button>
 
-              {/* Lista de Transações (Condicional) */}
+              {/* Lista Detalhada */}
               {isExpanded && (
-                <div className="px-5 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="h-px bg-gray-50 w-full mb-3"></div>
+                <div className="px-5 pb-5 space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="h-px bg-gray-100 w-full mb-4"></div>
                   {group.transactions.map((tx) => (
-                    <div key={tx.id} className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between">
+                    <div key={tx.id} className="bg-gray-50/50 rounded-2xl p-4 flex items-center justify-between border border-gray-100/50">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm border border-gray-100 shrink-0">
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -179,24 +202,23 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
                            </svg>
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <h4 className="font-bold text-gray-800 text-xs truncate">{tx.clientName}</h4>
+                          <h4 className="font-bold text-gray-800 text-xs truncate uppercase tracking-tight">{tx.clientName}</h4>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest">
+                            <span className="text-[8px] text-gray-400 font-black uppercase">
                               {activeFilter === 'day' 
                                 ? tx.createdAt.split('T')[1].substring(0, 5)
                                 : formatDateBR(tx.createdAt.split('T')[0])
                               }
                             </span>
-                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                            <span className="text-[8px] text-blue-600 font-black uppercase tracking-widest">
-                              {tx.durationMonths} {tx.durationMonths === 1 ? 'Mês' : 'Meses'}
+                            <span className="text-[8px] text-blue-600 font-black uppercase tracking-tighter bg-blue-50 px-1 rounded">
+                              {tx.durationMonths}M
                             </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-sm font-black text-green-600">
-                          {formatCurrency(tx.value)}
+                          {formatValue(tx.value)}
                         </p>
                       </div>
                     </div>
@@ -207,8 +229,7 @@ const GlobalTransactionHistory: React.FC<Props> = ({ clients }) => {
           );
         })}
       </div>
-      
-      <div className="h-20"></div>
+      <div className="h-24"></div>
     </div>
   );
 };
